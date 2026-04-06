@@ -171,61 +171,7 @@ class BICScore(StructureScore):
         return score
 
     def get_local_scores(self, target, indices, indices_after=None):
-        #asia
-        fixed_order = ['asia', 'tub', 'smoke', 'lung', 'bronc', 'either', 'xray', 'dysp']
-
-        #child
-        #fixed_order = ['BirthAsphyxia', 'HypDistrib', 'HypoxiaInO2', 'CO2', 'ChestXray' ,'Grunting', 'LVHreport', 'LowerBodyO2' ,'RUQO2', 'CO2Report' ,'XrayReport' ,'Disease', 'GruntingReport' ,'Age' ,'LVH', 'DuctFlow', 'CardiacMixing' ,'LungParench', 'LungFlow' ,'Sick']
-
-        #sports
-        #fixed_order = ['RDlevel', 'possession', 'HTshots', 'ATshots', 'HTshotOnTarget', 'ATshotsOnTarget', 'HTgoals', 'ATgoals', 'HDA']
-
-        #alarm
-        #fixed_order = ['HISTORY', 'HREKG', 'LVFAILURE', 'ERRLOWOUTPUT', 'HRSAT', 'VENTALV', 'FIO2', 'VENTLUNG', 'STROKEVOLUME', 'LVEDVOLUME', 'BP', 'CO', 'HYPOVOLEMIA', 'INTUBATION', 'TPR', 'VENTMACH', 'CATECHOL', 'PULMEMBOLUS', 'MINVOL', 'CVP', 'INSUFFANESTH', 'HRBP', 'SAO2', 'HR', 'PRESS', 'ERRCAUTER', 'PVSAT', 'VENTTUBE', 'KINKEDTUBE', 'DISCONNECT', 'MINVOLSET', 'ANAPHYLAXIS', 'EXPCO2', 'ARTCO2', 'PCWP', 'SHUNT', 'PAP']
-        
-        #sachs
-        #fixed_order = ['Akt', 'Erk', 'Jnk', 'Mek' ,'P38' ,'PIP2' ,'PIP3', 'PKA', 'PKC' ,'Plcg', 'Raf']
-
-        #hailfinder
-        '''
-        fixed_order = [
-        'N0_7muVerMo', 'SubjVertMo', 'QGVertMotion', 'CombVerMo', 'AreaMeso_ALS',
-        'SatContMoist', 'RaoContMoist', 'CombMoisture', 'AreaMoDryAir', 'VISCloudCov',
-        'IRCloudCover', 'CombClouds', 'CldShadeOth', 'AMInstabMt', 'InsInMt',
-        'WndHodograph', 'OutflowFrMt', 'MorningBound', 'Boundaries', 'CldShadeConv',
-        'CompPlFcst', 'CapChange', 'LoLevMoistAd', 'InsChange', 'MountainFcst',
-        'Date', 'Scenario', 'ScenRelAMCIN', 'MorningCIN', 'AMCINInScen',
-        'CapInScen', 'ScenRelAMIns', 'LIfr12ZDENSd', 'AMDewptCalPl', 'AMInsWliScen',
-        'InsSclInScen', 'ScenRel3_4', 'LatestCIN', 'LLIW', 'CurPropConv',
-        'ScnRelPlFcst', 'PlainsFcst', 'N34StarFcst', 'R5Fcst', 'Dewpoints',
-        'LowLLapse', 'MeanRH', 'MidLLapse', 'MvmtFeatures', 'RHRatio',
-        'SfcWndShfDis', 'SynForcng', 'TempDis', 'WindAloft', 'WindFieldMt',
-        'WindFieldPln'
-        ]
-        '''
-
-        #win95pts
-        '''
-        fixed_order = [
-            "AppOK", "DataFile", "AppData", "DskLocal", "PrtSpool", "PrtOn", "PrtPaper", 
-            "NetPrint", "PrtDriver", "PrtThread", "EMFOK", "GDIIN", "DrvSet", "DrvOK", 
-            "GDIOUT", "PrtSel", "PrtDataOut", "PrtPath", "NtwrkCnfg", "PTROFFLINE", "NetOK", 
-            "PrtCbl", "PrtPort", "CblPrtHrdwrOK", "LclOK", "DSApplctn", "PrtMpTPth", "DS_NTOK", 
-            "DS_LCLOK", "PC2PRT", "PrtMem", "PrtTimeOut", "FllCrrptdBffr", "TnrSpply", "PrtData", 
-            "Problem1", "AppDtGnTm", "PrntPrcssTm", "DeskPrntSpd", "PgOrnttnOK", "PrntngArOK", 
-            "ScrnFntNtPrntrFnt", "CmpltPgPrntd", "GrphcsRltdDrvrSttngs", "EPSGrphc", "NnPSGrphc", 
-            "PrtPScript", "PSGRAPHIC", "Problem4", "TrTypFnts", "FntInstlltn", "PrntrAccptsTrtyp", 
-            "TTOK", "NnTTOK", "Problem5", "LclGrbld", "NtGrbld", "GrbldOtpt", "HrglssDrtnAftrPrnt", 
-            "REPEAT", "AvlblVrtlMmry", "PSERRMEM", "TstpsTxt", "GrbldPS", "IncmpltPS", "PrtFile", 
-            "PrtIcon", "Problem6", "Problem3", "PrtQueue", "NtSpd", "Problem2", "PrtStatPaper", 
-            "PrtStatToner", "PrtStatMem", "PrtStatOff"
-        ]
-        '''
-        #formed
-        #fixed_order = ['Impulsivity', 'Intelligence', 'AbilityToCope', 'FinancialDifficulties', 'ProblematicLifeEvents', 'Victimisation', 'GangMember', 'AngerPT', 'ViolentThoughts', 'BPD', 'ASPD', 'AbuseNeglectAsChild', 'Violence', 'TimeAtRisk', 'Education', 'EmploymentOrTraining', 'AnxietyPT', 'DepressionPT', 'LivingCircumstances', 'SocialWithdraw', 'CriminalFamilyBackground', 'CriminalNetwork', 'ComplianceWithSupervision', 'NegativeAttitude', 'CriminalAttitude', 'SymptomsOfMentalIllness', 'ResponsivenessToTreatment', 'RefuseFailToAttendTherapy', 'HazardousDrinkingAfterRelease', 'CannabisBeforePrisonSentence', 'CocaineBeforePrisonSentence', 'EcstasyBeforePrisonSentence', 'EcstasyDuringPrisonSentence', 'CannabisDuringPrisonSentence', 'CocaineDuringPrisonSentence', 'CannabisAfterRelease', 'CocaineAfterRelease', 'EcstasyAfterRelease', 'EcstasyDependence', 'CannabisDependence', 'CocaineDependence', 'AnyDrugDependence', 'AlcoholDependence', 'DrugTreatment', 'AlcoholTreatment', 'AlcoholTreatmentGivenRFAT', 'DrugTreatmentGivenRFAT', 'HazardousDrinkingPT', 'EcstasyPT', 'CannabisPT', 'CocainePT', 'ResponseToTreatGivenAlcDep', 'ResponseToTreatGivenDrugDep', 'SubstanceUse', 'SubstanceMisuseDL', 'ViolentConvictions', 'ViolentConvRateGivenProt', 'Anger', 'AngerManagementGivenRFAT', 'AngerManagement', 'AttitudeDL', 'AggressionDL', 'MentalIllnessDL', 'SocialProtectiveObs', 'ViolentConvictionsRate', 'Depression', 'Anxiety', 'ThoughtInsertion', 'Hallucinations', 'StrangeExperiences', 'ParanoidDelusions', 'PsychiatricTreatment', 'PsychiatricTreatmentGivenRFAT', 'ThoughtInsertionPT', 'HallucinationsPT', 'StrangeExperiencesPT', 'ParanoidDelusionsPT', 'MentalIllnessSymptomCount', 'PCLRfacet3', 'Stress', 'PCLRfactor2', 'prioracq', 'Age', 'Gender', 'PriorViolentConvictions', 'pclrscore', 'DomesticStability', 'PCLRfactor1']
-
-        #property
-        #fixed_order = ['propertyManagement', 'propertyExpenses', 'actualRentalIncome', 'otherPropertyExpenses', 'rentalGrossProfit', 'rentalIncomeLoss%', 'rentalIncome', 'propertyPurchaseValue', 'propertyExpensesGrowth', 'rentalGrowth', 'stampDutyTaxBand', 'capitalGrowth', 'capitalGains', 'incomeTax', 'rentalNetProfitBeforeInterest', 'interestTaxRelief', 'interest', 'interestRate', 'borrowing', 'otherInterestFees', 'rentalGrossYield', 'rentalIncomeT+1', 'LTV', 'propertyValueT+1', 'stampDutyTax', 'otherPropertyExpensesT+1', 'netProfit']
+        fixed_order = list(self.data.columns)
 
         variable = fixed_order[target]
 
