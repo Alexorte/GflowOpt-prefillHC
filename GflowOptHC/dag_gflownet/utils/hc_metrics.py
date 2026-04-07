@@ -7,7 +7,7 @@ from dag_gflownet.utils.metrics import (
     bic_score_of_dag,
     bdeu_score_of_dag,
 )
-from utils.posterior_predictive import posterior_predictive_loglik_of_dag
+from dag_gflownet.utils.posterior_predictive import posterior_predictive_loglik_of_dag
 
 def compute_single_hc_structure_metrics(dag, graph, data_train, data_test, equivalent_sample_size=1.0):
     ground_truth = nx.to_numpy_array(graph, weight=None)

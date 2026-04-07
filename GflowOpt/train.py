@@ -557,7 +557,7 @@ if __name__ == '__main__':
     replay = parser.add_argument_group('Replay Buffer')
     replay.add_argument('--replay_capacity', type=int, default=100_000,
         help='Capacity of the replay buffer (default: %(default)s)')
-    replay.add_argument('--prefill', type=int, default=200,
+    replay.add_argument('--prefill', type=int, default=1000,
         help='Number of iterations with a random policy to prefill '
              'the replay buffer (default: %(default)s)')
     
