@@ -455,7 +455,7 @@ def main(args):
         num_samples=args.num_samples_posterior,
         desc='Sampling from posterior',
     )
-    score_results = posterior_score_stats(posterior, data, 1.0)
+    score_results = posterior_score_stats(posterior, data_test, 1.0)
 
     mll_results = posterior_neg_avg_posterior_predictive_loglik(
         posterior,
