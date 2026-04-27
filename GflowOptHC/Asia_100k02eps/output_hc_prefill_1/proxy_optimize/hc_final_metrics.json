@@ -1,0 +1,15 @@
+{
+  "HC_final_shd": 3.0,
+  "HC_final_num_edges": 7.0,
+  "HC_final_bic": -2314.823307264869,
+  "HC_final_bdeu": -2305.59075057018,
+  "HC_final_neg_posterior_predictive_loglik": 2263.3538245062887,
+  "HC_top_mean_shd": 3.25,
+  "HC_top_best_shd": 1.0,
+  "HC_top_mean_bic": -2315.940406954817,
+  "HC_top_best_bic": -2314.823307264869,
+  "HC_top_mean_bdeu": -2306.356813327005,
+  "HC_top_best_bdeu": -2305.59075057018,
+  "HC_top_mean_neg_posterior_predictive_loglik": 2264.0895539269495,
+  "HC_top_best_neg_posterior_predictive_loglik": 2263.353824506288
+}

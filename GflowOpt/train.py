@@ -404,7 +404,7 @@ def main(args):
                     'total_loss': current_loss       # 总损失
                 })
 
-                if should_compute_training_history(iteration=iteration, start_iteration=start_iteration, history_training=args.history_training, history_training_until=5000):
+                if should_compute_training_history(iteration=iteration, start_iteration=start_iteration, history_training=args.history_training, history_training_until=20000):
                     include_slow_metrics = should_compute_slow_history_metrics(iteration=iteration, history_training=args.history_training, history_training_slow_multiplier=2)
 
                     history_row = compute_training_history_row(

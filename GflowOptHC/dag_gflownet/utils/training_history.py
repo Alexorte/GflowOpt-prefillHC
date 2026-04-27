@@ -24,7 +24,7 @@ def should_compute_training_history(iteration, start_iteration, history_training
         return False
     if iteration > history_training_until:
         return False
-    early_checkpoints = {0, 1, 10, 50, 100}
+    early_checkpoints = {0, 1, 10, 50, 100, 500}
     if iteration in early_checkpoints:
         return True
     return iteration % history_training == 0
