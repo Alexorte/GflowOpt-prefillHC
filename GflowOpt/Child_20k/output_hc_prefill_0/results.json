@@ -1,0 +1,16 @@
+{
+    "expected_shd": 46.883,
+    "expected_edges": 41.42,
+    "roc_auc": 0.6339199999999999,
+    "prc_auc": 0.20036569942443577,
+    "ave_prec": 0.13233987264336425,
+    "bic_mean": -14177.000291859971,
+    "bic_max": -13497.623977859166,
+    "bdeu_mean": -14195.613843981053,
+    "bdeu_max": -13522.069524559702,
+    "neg_avg_predictive_log_likelihood": 13232.778463464689,
+    "predictive_log_likelihood_best": -12732.138119442592,
+    "training_time_seconds": 496.917861700058,
+    "evaluation_time_seconds": 77.79403686523438,
+    "total_time_seconds": 574.7118985652924
+}
