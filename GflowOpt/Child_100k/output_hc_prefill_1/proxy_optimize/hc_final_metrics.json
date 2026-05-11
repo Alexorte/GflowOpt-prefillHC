@@ -1,15 +1,15 @@
 {
-  "HC_final_shd": 7.0,
-  "HC_final_num_edges": 26.0,
-  "HC_final_bic": -12784.470535197832,
-  "HC_final_bdeu": -12811.550752203675,
-  "HC_final_neg_posterior_predictive_loglik": 12103.355423518127,
-  "HC_top_mean_shd": 7.25,
-  "HC_top_best_shd": 5.0,
-  "HC_top_mean_bic": -12881.181279277394,
-  "HC_top_best_bic": -12784.470535197832,
-  "HC_top_mean_bdeu": -12906.39535242647,
-  "HC_top_best_bdeu": -12811.550752203675,
-  "HC_top_mean_neg_posterior_predictive_loglik": 12144.086058637666,
-  "HC_top_best_neg_posterior_predictive_loglik": 12103.355423518124
+  "HC_final_shd": 10.0,
+  "HC_final_num_edges": 27.0,
+  "HC_final_bic": -12801.611434596522,
+  "HC_final_bdeu": -12825.223889979501,
+  "HC_final_neg_posterior_predictive_loglik": 12104.499515188754,
+  "HC_top_mean_shd": 9.25,
+  "HC_top_best_shd": 7.0,
+  "HC_top_mean_bic": -12790.033778491792,
+  "HC_top_best_bic": -12765.477835173586,
+  "HC_top_mean_bdeu": -12815.341632441017,
+  "HC_top_best_bdeu": -12797.708974741428,
+  "HC_top_mean_neg_posterior_predictive_loglik": 12103.831658760859,
+  "HC_top_best_neg_posterior_predictive_loglik": 12101.770568978625
 }

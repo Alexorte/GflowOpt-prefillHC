@@ -35,10 +35,6 @@
       "RUQO2"
     ],
     [
-      "CO2",
-      "CO2Report"
-    ],
-    [
       "ChestXray",
       "XrayReport"
     ],
@@ -49,6 +45,10 @@
     [
       "LVHreport",
       "LVH"
+    ],
+    [
+      "CO2Report",
+      "CO2"
     ],
     [
       "Disease",
@@ -72,7 +72,7 @@
     ],
     [
       "Disease",
-      "LungFlow"
+      "LungParench"
     ],
     [
       "Disease",
@@ -108,7 +108,7 @@
     ],
     [
       "LungParench",
-      "Disease"
+      "CO2Report"
     ],
     [
       "LungParench",
@@ -119,6 +119,10 @@
       "ChestXray"
     ],
     [
+      "LungFlow",
+      "Disease"
+    ],
+    [
       "Sick",
       "Grunting"
     ],
@@ -127,9 +131,9 @@
       "Age"
     ]
   ],
-  "score": -49521.88881866965,
-  "initial_score": -49935.29103041661,
-  "improvement": 413.4022117469576,
+  "score": -49543.10003456967,
+  "initial_score": -49852.77980026679,
+  "improvement": 309.6797656971248,
   "initial_matrix": [
     [
       0,
@@ -207,7 +211,7 @@
       0,
       0,
       0,
-      1,
+      0,
       0,
       0,
       0,
@@ -333,7 +337,7 @@
       0,
       0,
       0,
-      0,
+      1,
       0,
       0,
       0,
@@ -391,9 +395,9 @@
       1,
       1,
       1,
-      0,
       1,
-      0
+      0,
+      1
     ],
     [
       0,
@@ -515,9 +519,9 @@
       0,
       0,
       0,
-      0,
-      0,
       1,
+      0,
+      0,
       0,
       0,
       0,
@@ -539,7 +543,7 @@
       0,
       0,
       0,
-      0,
+      1,
       0,
       0,
       0,
@@ -563,7 +567,7 @@
       0,
       0,
       0,
-      1,
+      0,
       0,
       0,
       0,
@@ -649,7 +653,7 @@
       0,
       0,
       0,
-      1,
+      0,
       0,
       0,
       0,
@@ -775,7 +779,7 @@
       0,
       0,
       0,
-      0,
+      1,
       0,
       0,
       0,
@@ -833,8 +837,8 @@
       1,
       1,
       1,
-      0,
       1,
+      0,
       1
     ],
     [
@@ -957,9 +961,9 @@
       0,
       0,
       0,
-      0,
-      0,
       1,
+      0,
+      0,
       0,
       0,
       0,
@@ -981,7 +985,7 @@
       0,
       0,
       0,
-      0,
+      1,
       0,
       0,
       0,
@@ -1024,10 +1028,6 @@
       "RUQO2"
     ],
     [
-      "CO2",
-      "CO2Report"
-    ],
-    [
       "ChestXray",
       "XrayReport"
     ],
@@ -1038,6 +1038,10 @@
     [
       "LVHreport",
       "LVH"
+    ],
+    [
+      "CO2Report",
+      "CO2"
     ],
     [
       "Disease",
@@ -1061,7 +1065,11 @@
     ],
     [
       "Disease",
-      "LungFlow"
+      "LungParench"
+    ],
+    [
+      "Disease",
+      "Sick"
     ],
     [
       "DuctFlow",
@@ -1085,19 +1093,19 @@
     ],
     [
       "LungParench",
-      "Disease"
+      "CO2Report"
     ],
     [
       "LungFlow",
       "ChestXray"
     ],
     [
-      "Sick",
-      "Grunting"
+      "LungFlow",
+      "Disease"
     ],
     [
       "Sick",
-      "Age"
+      "Grunting"
     ]
   ]
 }
