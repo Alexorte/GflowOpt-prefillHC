@@ -307,6 +307,15 @@ def main(args):
             should_update = (prefill_needed and iteration >= args.prefill) or (not prefill_needed)
             
             if should_update:
+
+                if len(replay) < config.batch_size:
+                    pbar.set_postfix(
+                        replay=f"{len(replay)}/{config.batch_size}",
+                        status="filling_buffer",
+                        epsilon=f"{epsilon:.2f}"
+                    )
+                    continue
+
                 # Update the parameters of the GFlowNet
                 samples = replay.sample(batch_size=config.batch_size, rng=rng)
                 params, state, logs = gflownet.step(params, state, samples, normalization)
