@@ -305,16 +305,17 @@ def main(args):
 
             # 对于继续训练的情况，只有预填充完毕才执行模型更新
             should_update = (prefill_needed and iteration >= args.prefill) or (not prefill_needed)
-            
-            if should_update:
 
-                if len(replay) < config.batch_size:
-                    pbar.set_postfix(
-                        replay=f"{len(replay)}/{config.batch_size}",
-                        status="filling_buffer",
-                        epsilon=f"{epsilon:.2f}"
-                    )
-                    continue
+            should_history = should_update and should_compute_training_history(
+                iteration=iteration,
+                start_iteration=start_iteration,
+                history_training=args.history_training,
+                history_training_until=40000,
+            )
+
+            can_update = should_update and len(replay) >= config.batch_size
+            
+            if can_update:
 
                 # Update the parameters of the GFlowNet
                 samples = replay.sample(batch_size=config.batch_size, rng=rng)
@@ -413,36 +414,56 @@ def main(args):
                     'total_loss': current_loss       # 总损失
                 })
 
-                if should_compute_training_history(iteration=iteration, start_iteration=start_iteration, history_training=args.history_training, history_training_until=40000):
-                    include_slow_metrics = should_compute_slow_history_metrics(iteration=iteration, history_training=args.history_training, history_training_slow_multiplier=2)
-
-                    history_row = compute_training_history_row(
-                        iteration=iteration,
-                        train_start_time=train_start,
-                        gflownet=gflownet,
-                        params_online=params.online,
-                        env=history_env,
-                        key=key,
-                        normalization=normalization,
-                        graph=graph,
-                        data_train=data_train,
-                        data_test=data_test,
-                        current_loss=current_loss,
-                        avg_loss=avg_loss,
-                        smooth_loss=smooth_loss,
-                        epsilon=float(epsilon),
-                        learning_rate=float(lr_scheduler.current_lr),
-                        num_samples_history_posterior=args.num_samples_history_posterior,
-                        include_slow_metrics=include_slow_metrics,
-                        equivalent_sample_size=1.0,
-                    )
-                    training_history.append(history_row)
-                
-                # 如果连续100轮损失没有明显下降，且使用了学习率调度器，则打印学习率信息
+                                # 如果连续100轮损失没有明显下降，且使用了学习率调度器，则打印学习率信息
                 if hasattr(args, 'lr_scheduler') and args.lr_scheduler != 'none' and iteration % 100 == 0:
                     print(f"第 {iteration} 轮 | 学习率: {lr_scheduler.current_lr:.6f} | "
-                          f"总损失: {current_loss:.4f} | 平衡损失: {balance_loss:.4f} | "
-                          f"对比损失: {contrastive_loss:.4f} | 对比权重: {contrastive_lambda:.3f}")
+                            f"总损失: {current_loss:.4f} | 平衡损失: {balance_loss:.4f} | "
+                            f"对比损失: {contrastive_loss:.4f} | 对比权重: {contrastive_lambda:.3f}")
+
+            if should_history:
+                include_slow_metrics = should_compute_slow_history_metrics(iteration=iteration, history_training=args.history_training, history_training_slow_multiplier=2)
+
+                if can_update:
+                    loss_for_history = current_loss
+                    avg_loss_for_history = avg_loss
+                    smooth_loss_for_history = smooth_loss
+                    phase = "training"
+                else:
+                    loss_for_history = np.nan
+                    avg_loss_for_history = np.nan
+                    smooth_loss_for_history = np.nan
+                    phase = "filling_buffer"
+
+                history_row = compute_training_history_row(
+                    iteration=iteration,
+                    train_start_time=train_start,
+                    gflownet=gflownet,
+                    params_online=params.online,
+                    env=history_env,
+                    key=key,
+                    normalization=normalization,
+                    graph=graph,
+                    data_train=data_train,
+                    data_test=data_test,
+                    current_loss=loss_for_history,
+                    avg_loss=avg_loss_for_history,
+                    smooth_loss=smooth_loss_for_history,
+                    epsilon=float(epsilon),
+                    learning_rate=float(lr_scheduler.current_lr),
+                    num_samples_history_posterior=args.num_samples_history_posterior,
+                    include_slow_metrics=include_slow_metrics,
+                    equivalent_sample_size=1.0,
+                )
+                training_history.append(history_row)
+            
+            if should_update and not can_update:
+                pbar.set_postfix(
+                    epsilon=f"{epsilon:.2f}",
+                    replay=f"{len(replay)}/{config.batch_size}",
+                    status="filling_buffer",
+                )
+                continue
+                
                     
     training_time = time.time() - train_start
     

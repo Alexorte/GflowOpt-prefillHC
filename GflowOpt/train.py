@@ -404,11 +404,22 @@ def main(args):
                     'total_loss': current_loss       # 总损失
                 })
 
-                if should_compute_training_history(iteration=iteration, start_iteration=start_iteration, history_training=args.history_training, history_training_until=40000):
-                    include_slow_metrics = should_compute_slow_history_metrics(iteration=iteration, history_training=args.history_training, history_training_slow_multiplier=2)
+                history_iteration = iteration - args.prefill
+
+                if should_compute_training_history(
+                    iteration=history_iteration,
+                    start_iteration=0,
+                    history_training=args.history_training,
+                    history_training_until=40000,
+                ):
+                    include_slow_metrics = should_compute_slow_history_metrics(
+                        iteration=history_iteration,
+                        history_training=args.history_training,
+                        history_training_slow_multiplier=2,
+                    )
 
                     history_row = compute_training_history_row(
-                        iteration=iteration,
+                        iteration=history_iteration,
                         train_start_time=train_start,
                         gflownet=gflownet,
                         params_online=params.online,
@@ -427,6 +438,7 @@ def main(args):
                         include_slow_metrics=include_slow_metrics,
                         equivalent_sample_size=1.0,
                     )
+
                     training_history.append(history_row)
                 
                 # 如果连续100轮损失没有明显下降，且使用了学习率调度器，则打印学习率信息
