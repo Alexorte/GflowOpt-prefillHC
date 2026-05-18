@@ -163,6 +163,15 @@ def main(args):
         for dag in prefill_final_dags],
         dtype=float
     )
+    prefill_cache_summary = {}
+    if len(stats) > 0 and "cache_hit_rate" in stats[-1]:
+        prefill_cache_summary = {
+            "hc_cache_size": float(stats[-1]["cache_size"]),
+            "hc_cache_hits": float(stats[-1]["cache_hits"]),
+            "hc_cache_misses": float(stats[-1]["cache_misses"]),
+            "hc_cache_stores": float(stats[-1]["cache_stores"]),
+            "hc_cache_hit_rate": float(stats[-1]["cache_hit_rate"]),
+        }
 
     print(f"HC prefill completado con {len(stats)} episodios.")
     
@@ -513,6 +522,7 @@ def main(args):
         **threshold_metrics(posterior, ground_truth),
         **score_results,
         **mll_results,
+        **prefill_cache_summary,
         "Prefill_mean_final_edges": float(np.mean(prefill_final_edges)),
 
         "Prefill_mean_final_score": float(np.mean(prefill_final_scores)),
