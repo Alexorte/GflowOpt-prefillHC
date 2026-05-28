@@ -57,7 +57,6 @@ class HCDeltaCache:
             "cache_hit_rate": float(hit_rate),
         }
 
-
 # Esta función asume env.num_envs == 1 en el entorno real.
 # Se crea un batch virtual interno de tamaño K para evaluar candidatos.
 #
