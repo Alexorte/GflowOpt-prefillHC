@@ -1,0 +1,8 @@
+{
+    "iteration": 30000,
+    "timestamp": 1778922804,
+    "epsilon": 0.5399999618530273,
+    "lr": 3e-05,
+    "best_loss": 118.8622817993164,
+    "best_epoch": 44
+}

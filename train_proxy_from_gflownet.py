@@ -1725,11 +1725,58 @@ if __name__ == "__main__":
         asia_intervention_bic = graph_subparsers.add_parser('sports_custom')
 
     args = parser.parse_args()
-    
-    # 根据模式执行不同的操作
-    if args.mode == 'train':
-        main(args)
-    elif args.mode == 'optimize':
-        optimize_with_proxy(args)
-    else:
-        parser.print_help()
+
+    start_perf = time.perf_counter()
+    start_wall = time.time()
+    status = "success"
+    error_message = None
+
+    try:
+        if args.mode == 'train':
+            main(args)
+
+        elif args.mode == 'optimize':
+            optimize_with_proxy(args)
+
+        else:
+            status = "no_mode"
+            parser.print_help()
+
+    except Exception as e:
+        status = "failed"
+        error_message = repr(e)
+        raise
+
+    finally:
+        end_perf = time.perf_counter()
+        end_wall = time.time()
+
+        elapsed_seconds = end_perf - start_perf
+
+        timing_output_dir = getattr(args, "output_dir", ".")
+        os.makedirs(timing_output_dir, exist_ok=True)
+
+        timing_info = {
+            "phase": "proxy_training" if getattr(args, "mode", None) == "train" else "proxy_optimization",
+            "mode": getattr(args, "mode", None),
+            "graph": getattr(args, "graph", None),
+            "seed": getattr(args, "seed", None),
+
+            "status": status,
+            "error": error_message,
+
+            "start_time": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_wall)),
+            "end_time": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_wall)),
+
+            "elapsed_seconds": elapsed_seconds,
+            "elapsed_minutes": elapsed_seconds / 60.0,
+            "elapsed_hours": elapsed_seconds / 3600.0,
+            "elapsed_hms": time.strftime("%H:%M:%S", time.gmtime(elapsed_seconds))
+        }
+
+        timing_path = os.path.join(timing_output_dir, "execution_time.json")
+
+        with open(timing_path, "w", encoding="utf-8") as f:
+            json.dump(timing_info, f, indent=4, ensure_ascii=False)
+
+        print(f"Tiempo de ejecución guardado en: {timing_path}")

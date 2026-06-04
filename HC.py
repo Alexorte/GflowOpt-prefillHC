@@ -2256,11 +2256,79 @@ if __name__ == "__main__":
         asia_intervention_bic = graph_subparsers.add_parser('sports_custom')
 
     args = parser.parse_args()
-    
-    # 根据模式执行不同的操作
-    if args.mode == 'train':
-        main(args)
-    elif args.mode == 'optimize':
-        optimize_with_proxy(args)
-    else:
-        parser.print_help()
+
+    # Medición del tiempo total de ejecución
+    start_perf = time.perf_counter()
+    start_wall = time.time()
+    status = "success"
+    error_message = None
+
+    try:
+        if args.mode == 'train':
+            main(args)
+
+        elif args.mode == 'optimize':
+            optimize_with_proxy(args)
+
+        else:
+            status = "no_mode"
+            parser.print_help()
+
+    except Exception as e:
+        status = "failed"
+        error_message = repr(e)
+        raise
+
+    finally:
+        end_perf = time.perf_counter()
+        end_wall = time.time()
+
+        elapsed_seconds = end_perf - start_perf
+
+        # ------------------------------------------------------------
+        # Guardar el tiempo dentro de la carpeta proxy_optimize.
+        #
+        # Con una ejecución como:
+        #   --output_dir output_hc_prefill_seed0/final_optimization
+        #
+        # se guardará en:
+        #   output_hc_prefill_seed0/proxy_optimize/execution_time.json
+        # ------------------------------------------------------------
+        base_output_dir = getattr(args, "output_dir", ".")
+
+        if os.path.basename(os.path.normpath(base_output_dir)) == "proxy_optimize":
+            timing_output_dir = base_output_dir
+        else:
+            experiment_dir = os.path.dirname(os.path.normpath(base_output_dir))
+            timing_output_dir = os.path.join(experiment_dir, "proxy_optimize")
+
+        os.makedirs(timing_output_dir, exist_ok=True)
+
+        timing_info = {
+            "phase": "hill_climbing_optimization",
+            "mode": getattr(args, "mode", None),
+            "graph": getattr(args, "graph", None),
+            "seed": getattr(args, "seed", None),
+
+            "gflownet_model_path": getattr(args, "gflownet_model_path", None),
+            "proxy_model_path": getattr(args, "proxy_model_path", None),
+            "output_dir": getattr(args, "output_dir", None),
+
+            "status": status,
+            "error": error_message,
+
+            "start_time": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_wall)),
+            "end_time": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_wall)),
+
+            "elapsed_seconds": elapsed_seconds,
+            "elapsed_minutes": elapsed_seconds / 60.0,
+            "elapsed_hours": elapsed_seconds / 3600.0,
+            "elapsed_hms": time.strftime("%H:%M:%S", time.gmtime(elapsed_seconds))
+        }
+
+        timing_path = os.path.join(timing_output_dir, "execution_time.json")
+
+        with open(timing_path, "w", encoding="utf-8") as f:
+            json.dump(timing_info, f, indent=4, ensure_ascii=False)
+
+        print(f"Tiempo de ejecución guardado en: {timing_path}")
