@@ -68,15 +68,11 @@
     ],
     [
       "Disease",
-      "BirthAsphyxia"
+      "Sick"
     ],
     [
       "Disease",
-      "Sick"
-    ],
-    [
-      "Age",
-      "Sick"
+      "BirthAsphyxia"
     ],
     [
       "LVH",
@@ -96,7 +92,7 @@
     ],
     [
       "LungParench",
-      "HypoxiaInO2"
+      "CO2"
     ],
     [
       "LungParench",
@@ -112,7 +108,7 @@
     ],
     [
       "LungParench",
-      "CO2"
+      "HypoxiaInO2"
     ],
     [
       "LungFlow",
@@ -124,12 +120,16 @@
     ],
     [
       "Sick",
+      "Age"
+    ],
+    [
+      "Sick",
       "Grunting"
     ]
   ],
   "score": -49504.38642903134,
-  "initial_score": -50154.376198706195,
-  "improvement": 649.9897696748521,
+  "initial_score": -50057.73847144155,
+  "improvement": 553.3520424102098,
   "initial_matrix": [
     [
       0,
@@ -223,7 +223,7 @@
       0,
       0,
       0,
-      1,
+      0,
       0,
       0,
       0,
@@ -437,23 +437,23 @@
       0,
       0,
       0,
-      1
+      0
     ],
     [
       0,
       0,
       0,
-      1,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
       0,
       0,
       0,
       1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
       0,
       0,
       0,
@@ -508,17 +508,17 @@
     [
       0,
       0,
-      1,
       0,
       1,
       1,
+      1,
       0,
       0,
       0,
       1,
       0,
       0,
-      1,
+      0,
       0,
       0,
       0,
@@ -879,7 +879,7 @@
       0,
       0,
       0,
-      1
+      0
     ],
     [
       0,
@@ -1005,7 +1005,7 @@
       0,
       0,
       0,
-      0,
+      1,
       0,
       0,
       0,
@@ -1030,10 +1030,6 @@
     [
       "HypoxiaInO2",
       "RUQO2"
-    ],
-    [
-      "ChestXray",
-      "CO2"
     ],
     [
       "ChestXray",
@@ -1072,20 +1068,8 @@
       "LungParench"
     ],
     [
-      "Age",
-      "Sick"
-    ],
-    [
-      "LVH",
-      "CO2"
-    ],
-    [
       "LVH",
       "LVHreport"
-    ],
-    [
-      "LVH",
-      "Age"
     ],
     [
       "CardiacMixing",
@@ -1093,7 +1077,7 @@
     ],
     [
       "LungParench",
-      "HypoxiaInO2"
+      "CO2"
     ],
     [
       "LungParench",
@@ -1106,10 +1090,6 @@
     [
       "LungParench",
       "CO2Report"
-    ],
-    [
-      "LungParench",
-      "GruntingReport"
     ],
     [
       "LungFlow",

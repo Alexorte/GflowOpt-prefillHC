@@ -1,0 +1,17 @@
+{
+    "phase": "hill_climbing_optimization",
+    "mode": "optimize",
+    "graph": "sachs_interventional_bic",
+    "seed": 0,
+    "gflownet_model_path": "output_hc_prefill_0/model.npz",
+    "proxy_model_path": "output_hc_prefill_0/proxy/proxy_model.pkl",
+    "output_dir": "output_hc_prefill_0/proxy_optimize",
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 17:41:36",
+    "end_time": "2026-06-04 17:42:12",
+    "elapsed_seconds": 35.78174298629165,
+    "elapsed_minutes": 0.5963623831048608,
+    "elapsed_hours": 0.00993937305174768,
+    "elapsed_hms": "00:00:35"
+}

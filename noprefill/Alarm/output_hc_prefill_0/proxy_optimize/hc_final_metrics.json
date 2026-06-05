@@ -4,12 +4,12 @@
   "HC_final_bic": -12279.42454313603,
   "HC_final_bdeu": -11634.14580854795,
   "HC_final_neg_posterior_predictive_loglik": 11002.148776958702,
-  "HC_top_mean_shd": 94.8,
+  "HC_top_mean_shd": 94.88888888888889,
   "HC_top_best_shd": 93.0,
-  "HC_top_mean_bic": -12413.513167478988,
+  "HC_top_mean_bic": -12427.671533209785,
   "HC_top_best_bic": -12279.42454313603,
-  "HC_top_mean_bdeu": -11730.228297018219,
+  "HC_top_mean_bdeu": -11740.058326241491,
   "HC_top_best_bdeu": -11634.14580854795,
-  "HC_top_mean_neg_posterior_predictive_loglik": 11059.220746308065,
+  "HC_top_mean_neg_posterior_predictive_loglik": 11064.364388779744,
   "HC_top_best_neg_posterior_predictive_loglik": 11002.148776958702
 }

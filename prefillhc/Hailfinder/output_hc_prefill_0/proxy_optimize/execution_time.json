@@ -1,0 +1,17 @@
+{
+    "phase": "hill_climbing_optimization",
+    "mode": "optimize",
+    "graph": "hailfinder_interventional_bic",
+    "seed": 0,
+    "gflownet_model_path": "output_hc_prefill_0/model.npz",
+    "proxy_model_path": "output_hc_prefill_0/proxy/proxy_model.pkl",
+    "output_dir": "output_hc_prefill_0/proxy_optimize",
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 14:31:34",
+    "end_time": "2026-06-04 14:35:42",
+    "elapsed_seconds": 247.41956141311675,
+    "elapsed_minutes": 4.1236593568852795,
+    "elapsed_hours": 0.06872765594808798,
+    "elapsed_hms": "00:04:07"
+}

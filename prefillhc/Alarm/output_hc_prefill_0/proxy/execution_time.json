@@ -1,0 +1,14 @@
+{
+    "phase": "proxy_training",
+    "mode": "train",
+    "graph": "alarm_interventional_bic",
+    "seed": 42,
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 15:00:22",
+    "end_time": "2026-06-04 15:05:11",
+    "elapsed_seconds": 288.75262462254614,
+    "elapsed_minutes": 4.812543743709102,
+    "elapsed_hours": 0.0802090623951517,
+    "elapsed_hms": "00:04:48"
+}

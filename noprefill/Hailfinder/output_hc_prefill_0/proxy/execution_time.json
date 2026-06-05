@@ -1,0 +1,14 @@
+{
+    "phase": "proxy_training",
+    "mode": "train",
+    "graph": "hailfinder_interventional_bic",
+    "seed": 42,
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 13:58:13",
+    "end_time": "2026-06-04 14:03:02",
+    "elapsed_seconds": 288.99346717074513,
+    "elapsed_minutes": 4.816557786179086,
+    "elapsed_hours": 0.08027596310298477,
+    "elapsed_hms": "00:04:48"
+}

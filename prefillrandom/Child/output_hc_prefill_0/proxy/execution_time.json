@@ -1,0 +1,14 @@
+{
+    "phase": "proxy_training",
+    "mode": "train",
+    "graph": "child_interventional_bic",
+    "seed": 42,
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 18:02:36",
+    "end_time": "2026-06-04 18:06:51",
+    "elapsed_seconds": 255.56483053322881,
+    "elapsed_minutes": 4.25941384222048,
+    "elapsed_hours": 0.07099023070367468,
+    "elapsed_hms": "00:04:15"
+}

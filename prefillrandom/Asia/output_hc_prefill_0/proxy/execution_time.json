@@ -1,0 +1,14 @@
+{
+    "phase": "proxy_training",
+    "mode": "train",
+    "graph": "asia_interventional_bic",
+    "seed": 42,
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 18:09:45",
+    "end_time": "2026-06-04 18:13:23",
+    "elapsed_seconds": 218.1349767446518,
+    "elapsed_minutes": 3.6355829457441966,
+    "elapsed_hours": 0.06059304909573661,
+    "elapsed_hms": "00:03:38"
+}

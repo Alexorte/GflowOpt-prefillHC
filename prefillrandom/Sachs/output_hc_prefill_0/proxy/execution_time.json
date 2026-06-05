@@ -1,0 +1,14 @@
+{
+    "phase": "proxy_training",
+    "mode": "train",
+    "graph": "sachs_interventional_bic",
+    "seed": 42,
+    "status": "success",
+    "error": null,
+    "start_time": "2026-06-04 17:33:59",
+    "end_time": "2026-06-04 17:38:10",
+    "elapsed_seconds": 250.02930478099734,
+    "elapsed_minutes": 4.167155079683289,
+    "elapsed_hours": 0.06945258466138815,
+    "elapsed_hms": "00:04:10"
+}
