@@ -1,0 +1,18 @@
+{
+    "OUTPUT_RANDOM_PREFILL": {
+        "expected_shd": "114.7944 ± 16.3063",
+        "expected_edges": "90.6300 ± 10.2743",
+        "roc_auc": "0.6148 ± 0.0521",
+        "prc_auc": "0.1823 ± 0.0802",
+        "ave_prec": "0.0773 ± 0.0427",
+        "bic_mean": "-60150.4524 ± 1621.4179",
+        "bic_max": "-59773.6468 ± 1565.2237",
+        "bdeu_mean": "-60160.9198 ± 1818.4194",
+        "bdeu_max": "-59702.7621 ± 1720.2352",
+        "neg_avg_predictive_log_likelihood": "55448.3758 ± 1408.7321",
+        "predictive_log_likelihood_best": "-55199.2294 ± 1336.6734",
+        "training_time_seconds": "1861.8437 ± 26.0571",
+        "evaluation_time_seconds": "207.3662 ± 7.8672",
+        "total_time_seconds": "2069.2099 ± 30.9545"
+    }
+}

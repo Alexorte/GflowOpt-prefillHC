@@ -1,0 +1,14 @@
+metric,mean_std
+HC_final_shd,75.0000 ± 14.5086
+HC_final_num_edges,68.8000 ± 1.6432
+HC_final_bic,-53496.9358 ± 159.8089
+HC_final_bdeu,-52971.5176 ± 104.6840
+HC_final_neg_posterior_predictive_loglik,49396.0344 ± 35.8160
+HC_top_best_bdeu,-52948.8218 ± 97.2764
+HC_top_best_bic,-53410.7596 ± 153.1984
+HC_top_best_neg_posterior_predictive_loglik,49390.7123 ± 31.7833
+HC_top_best_shd,74.6000 ± 14.0464
+HC_top_mean_bdeu,-53063.8742 ± 101.9242
+HC_top_mean_bic,-53624.2652 ± 159.8082
+HC_top_mean_neg_posterior_predictive_loglik,49447.7424 ± 63.3535
+HC_top_mean_shd,84.2725 ± 15.2953

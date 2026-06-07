@@ -1,0 +1,27 @@
+{
+    "OUTPUT_HC_PREFILL04eps": {
+        "expected_shd": "10.8142 ± 5.8806",
+        "expected_edges": "17.4016 ± 9.6083",
+        "roc_auc": "0.7594 ± 0.1630",
+        "prc_auc": "0.5653 ± 0.3022",
+        "ave_prec": "0.4474 ± 0.2340",
+        "bic_mean": "-77167.7194 ± 9305.3883",
+        "bic_max": "-77134.4745 ± 9322.2538",
+        "bdeu_mean": "-76941.7184 ± 9431.8306",
+        "bdeu_max": "-76915.4818 ± 9445.4380",
+        "neg_avg_predictive_log_likelihood": "76224.5304 ± 9765.0786",
+        "predictive_log_likelihood_best": "-76222.4862 ± 9766.2237",
+        "Prefill_mean_final_edges": "18.9780 ± 0.1705",
+        "Prefill_mean_final_score": "-289426.6409 ± 201.2397",
+        "Prefill_mean_shd": "19.6420 ± 1.6158",
+        "Prefill_best_shd": "5.0000 ± 3.2404",
+        "Prefill_bic_mean": "-73179.5099 ± 127.9113",
+        "Prefill_bic_best": "-72620.1152 ± 132.5892",
+        "Prefill_bdeu_mean": "-72713.3608 ± 128.9636",
+        "Prefill_bdeu_best": "-72435.2254 ± 132.3011",
+        "hc_prefill_time_seconds": "13.5910 ± 0.0644",
+        "training_time_seconds": "914.5267 ± 4.9139",
+        "evaluation_time_seconds": "61.6484 ± 16.3497",
+        "total_time_seconds": "989.7660 ± 16.7260"
+    }
+}

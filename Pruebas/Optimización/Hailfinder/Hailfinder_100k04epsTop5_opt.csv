@@ -1,0 +1,13 @@
+metric,mean_std
+top5_mean_shd,77.7600 ± 7.9087
+top5_mean_num_edges,70.4800 ± 1.5659
+top5_mean_bic,-53579.3768 ± 97.5841
+top5_mean_bdeu,-53015.9032 ± 70.5784
+top5_mean_posterior_predictive_loglik,-49389.0773 ± 10.3442
+top5_mean_neg_posterior_predictive_loglik,49389.0773 ± 10.3442
+top5_std_bdeu,72.4819 ± 27.2418
+top5_std_bic,87.8236 ± 30.4492
+top5_std_neg_posterior_predictive_loglik,16.3708 ± 11.5706
+top5_std_num_edges,2.0185 ± 0.6944
+top5_std_posterior_predictive_loglik,16.3708 ± 11.5706
+top5_std_shd,8.6701 ± 3.2806

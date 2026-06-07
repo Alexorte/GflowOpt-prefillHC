@@ -1,0 +1,32 @@
+{
+    "OUTPUT_HC_PREFILL": {
+        "expected_shd": "144.1538 ± 23.8174",
+        "expected_edges": "115.4706 ± 20.4638",
+        "roc_auc": "0.6148 ± 0.0447",
+        "prc_auc": "0.1587 ± 0.0616",
+        "ave_prec": "0.0574 ± 0.0262",
+        "bic_mean": "-61366.6374 ± 1907.4094",
+        "bic_max": "-60689.2288 ± 2247.7013",
+        "bdeu_mean": "-61435.7705 ± 2195.1914",
+        "bdeu_max": "-60665.9701 ± 2482.0064",
+        "neg_avg_predictive_log_likelihood": "56129.0667 ± 1079.1159",
+        "predictive_log_likelihood_best": "-55518.9800 ± 1502.5169",
+        "Prefill_mean_final_edges": "65.6080 ± 1.3457",
+        "Prefill_mean_final_score": "-202914.2323 ± 81.9857",
+        "Prefill_mean_shd": "55.8618 ± 6.0523",
+        "Prefill_best_shd": "30.8000 ± 5.4037",
+        "Prefill_bic_mean": "-53663.6945 ± 143.3911",
+        "Prefill_bic_best": "-53433.9853 ± 126.4162",
+        "Prefill_bdeu_mean": "-53161.2495 ± 152.6191",
+        "Prefill_bdeu_best": "-52949.1537 ± 127.2156",
+        "hc_prefill_time_seconds": "956.5314 ± 10.9336",
+        "training_time_seconds": "1874.9500 ± 24.7741",
+        "evaluation_time_seconds": "226.7292 ± 15.2367",
+        "total_time_seconds": "3058.2106 ± 29.2779",
+        "hc_cache_hit_rate": "0.9998 ± 0.0000",
+        "hc_cache_hits": "108649071.6000 ± 2160606.3541",
+        "hc_cache_misses": "20315.8000 ± 452.8788",
+        "hc_cache_size": "20315.8000 ± 452.8788",
+        "hc_cache_stores": "20315.8000 ± 452.8788"
+    }
+}
