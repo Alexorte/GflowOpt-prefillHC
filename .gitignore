@@ -1,0 +1,7 @@
+
+# Salidas de la ampliación
+resultados_ampliacion/
+logs_ampliacion/
+output_v2_*/
+prueba_*.log
+wandb/
