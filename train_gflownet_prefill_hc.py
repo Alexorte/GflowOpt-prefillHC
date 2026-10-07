@@ -150,7 +150,7 @@ def main(args):
     prefill_final_scores = np.array([s["final_score"] for s in stats], dtype=float)
     prefill_final_dags = np.stack([s["final_adj"] for s in stats], axis=0)
 
-    ground_truth_prefill = nx.to_numpy_array(graph, weight=None)
+    ground_truth_prefill = nx.to_numpy_array(graph, nodelist=list(data.columns), weight=None)  # FIX orden de nodos (Alarm)
 
     prefill_shds = np.sum(np.abs(prefill_final_dags - ground_truth_prefill), axis=(1, 2))
 
@@ -515,7 +515,7 @@ def main(args):
     eval_time = time.time() - eval_start
 
     # Compute the metrics
-    ground_truth = nx.to_numpy_array(graph, weight=None)
+    ground_truth = nx.to_numpy_array(graph, nodelist=list(data.columns), weight=None)  # FIX orden de nodos (Alarm)
     results = {
         'expected_shd': expected_shd(posterior, ground_truth),
         'expected_edges': expected_edges(posterior),

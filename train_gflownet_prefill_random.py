@@ -479,7 +479,7 @@ def main(args):
     eval_time = time.time() - eval_start
 
     # Compute the metrics
-    ground_truth = nx.to_numpy_array(graph, weight=None)
+    ground_truth = nx.to_numpy_array(graph, nodelist=list(data.columns), weight=None)  # FIX orden de nodos (Alarm)
     results = {
         'expected_shd': expected_shd(posterior, ground_truth),
         'expected_edges': expected_edges(posterior),

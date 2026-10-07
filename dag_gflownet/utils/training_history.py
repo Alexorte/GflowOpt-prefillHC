@@ -50,7 +50,7 @@ def compute_training_history_row(*, iteration: int, train_start_time: float, gfl
         desc=f"History eval @ {iteration}",
     )
 
-    ground_truth = nx.to_numpy_array(graph, weight=None)
+    ground_truth = nx.to_numpy_array(graph, nodelist=list(data_train.columns), weight=None)  # FIX orden de nodos (Alarm)
     threshold_results = threshold_metrics(posterior, ground_truth)
     score_results = posterior_score_stats(
         posterior,

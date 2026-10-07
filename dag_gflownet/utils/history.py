@@ -6,7 +6,7 @@ def summarize_prefill_history(stats, episode_num, graph, data_test):
     dags = np.stack([s["final_adj"] for s in stats], axis=0)
     final_edges = np.array([s["final_num_edges"] for s in stats], dtype=float)
 
-    ground_truth_prefill = nx.to_numpy_array(graph, weight=None)
+    ground_truth_prefill = nx.to_numpy_array(graph, nodelist=list(data_test.columns), weight=None)  # FIX orden de nodos (Alarm)
     shds = np.sum(np.abs(dags - ground_truth_prefill), axis=(1, 2))
 
     bic_vals = np.array(
