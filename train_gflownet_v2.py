@@ -437,7 +437,10 @@ def main(args):
             observations = next_observations
 
             # 对于继续训练的情况，只有预填充完毕才执行模型更新
-            should_update = iteration >= start_iteration
+            # Solo se entrena cuando el buffer tiene al menos un lote completo
+            # (con --prefill 0 el buffer empieza vacío)
+            buffer_size = len(replay) + (len(expert) if expert is not None else 0)
+            should_update = (iteration >= start_iteration) and (buffer_size >= config.batch_size)
             
             if should_update:
                 # Update the parameters of the GFlowNet
