@@ -203,3 +203,62 @@ Las principales métricas de evaluación utilizadas son:
 ## Notas
 
 Este repositorio tiene como objetivo reproducir los experimentos realizados en el TFG y documentar las modificaciones introducidas sobre el marco original GFlowOpt. Algunos comandos pueden requerir pequeñas adaptaciones dependiendo del conjunto de datos, el directorio de salida y el entorno computacional utilizado.
+
+## Ampliación (rama `ampliacion-politica-informada`)
+
+Cambios respecto al TFG:
+
+* **Corrección del orden de nodos del ground truth.** En Alarm, el orden de nodos de pgmpy no coincidía con el `fixed_order` de los datos (35 de 37 posiciones), así que el SHD de Alarm se calculaba contra una red permutada. Ahora se usa `nodelist=list(data.columns)` (líneas marcadas con `# FIX orden de nodos (Alarm)`).
+* **`train_gflownet_v2.py`**: copia de `train_gflownet_prefill_hc.py` con opciones nuevas. **Sin opciones nuevas se comporta igual que el script original.**
+
+| Opción | Qué hace |
+| --- | --- |
+| `--informed` | Política informada: logits de cada arista = beta·ΔBIC + salida de la red |
+| `--logit_scale_init 3.0` | Escala aprendible del logit de parada (3.0 ≈ ×20) |
+| `--update_target_every 50` | Red objetivo más frecuente (ya existía; por defecto 1000) |
+| `--fixed_epsilon 0.1` | Exploración fija del 10 % (ya existía) |
+| `--max_parents 5` | Máximo de padres por nodo |
+| `--beta0`, `--beta_end`, `--anneal_frac` | Templado de la recompensa: log R = beta·BIC |
+| `--expert_buffer`, `--rho_start`, `--rho_end` | Buffer experto protegido y muestreo mixto |
+| `--backward_K`, `--boundary_M` | Trayectorias hacia atrás y transiciones frontera desde los DAGs del prefill |
+| `--pretrain_steps` | Preentrenamiento sobre el buffer experto |
+| `--hc_every`, `--hc_top`, `--hc_K` | Hill Climbing dentro del bucle de entrenamiento |
+
+Módulos nuevos: `dag_gflownet/gflownet_informed.py`, `dag_gflownet/nets/gflownet_informed.py`, `dag_gflownet/warmstart_v2.py`, `dag_gflownet/utils/replay_buffer_mixed.py`.
+
+### Comandos
+
+Prueba corta (comprobar que todo funciona, 1.000 iteraciones):
+
+```bash
+micromamba run -n gflowOpt python train_gflownet_v2.py \
+  --lr 3e-5 --batch_size 256 --num_iterations 1000 --prefill 0 \
+  --informed --update_target_every 50 --logit_scale_init 3.0 \
+  --fixed_epsilon 0.1 --max_parents 5 \
+  --seed 0 --history_training 250 \
+  --output_folder output_v2_prueba_asia \
+  asia_interventional_bic
+```
+
+Configuraciones a comparar (cambiar `--seed`, `--output_folder` y el dataset):
+
+```bash
+# Base del TFG (sin prefill), con el SHD ya corregido
+micromamba run -n gflowOpt python train_gflownet_v2.py --lr 1e-4 --batch_size 256 --prefill 0 \
+  --seed 0 --history_training 1000 --output_folder output_v2_base_s0 child_interventional_bic
+
+# F: correcciones de entrenamiento
+micromamba run -n gflowOpt python train_gflownet_v2.py --lr 1e-4 --batch_size 256 --prefill 0 \
+  --update_target_every 50 --logit_scale_init 3.0 --fixed_epsilon 0.1 --max_parents 5 \
+  --seed 0 --history_training 1000 --output_folder output_v2_F_s0 child_interventional_bic
+
+# I: política informada
+micromamba run -n gflowOpt python train_gflownet_v2.py --lr 3e-5 --batch_size 256 --prefill 0 \
+  --informed --update_target_every 50 --logit_scale_init 3.0 --fixed_epsilon 0.1 --max_parents 5 \
+  --seed 0 --history_training 1000 --output_folder output_v2_I_s0 child_interventional_bic
+```
+
+Notas:
+
+* Las fases 2 y 3 (`train_proxy_from_gflownet.py`, `HC.py`) crean su propio `DAGGFlowNet`. Con un modelo entrenado con `--informed`, hay que cargarlo con `InformedDAGGFlowNet` (todavía no está adaptado).
+* Si `wandb` pide iniciar sesión, se puede añadir `WANDB_MODE=offline` delante del comando.
