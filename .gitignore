@@ -5,3 +5,5 @@ logs_ampliacion/
 output_v2_*/
 prueba_*.log
 wandb/
+smoke_ampliacion/
+__pycache__/

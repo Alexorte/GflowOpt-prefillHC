@@ -206,17 +206,28 @@ Este repositorio tiene como objetivo reproducir los experimentos realizados en e
 
 ## Ampliación (rama `ampliacion-politica-informada`)
 
-Cambios respecto al TFG:
+### Correcciones respecto al TFG
 
-* **Corrección del orden de nodos del ground truth.** En Alarm, el orden de nodos de pgmpy no coincidía con el `fixed_order` de los datos (35 de 37 posiciones), así que el SHD de Alarm se calculaba contra una red permutada. Ahora se usa `nodelist=list(data.columns)` (líneas marcadas con `# FIX orden de nodos (Alarm)`).
-* **`train_gflownet_v2.py`**: copia de `train_gflownet_prefill_hc.py` con opciones nuevas. **Sin opciones nuevas se comporta igual que el script original.**
+* **Orden de nodos del ground truth.** En Alarm (y en cualquier red cuyo orden de pgmpy no coincida con el `fixed_order` de los datos) el SHD/AUROC se calculaba contra una red permutada: por eso el AUROC de Alarm salía ≈ 0,50 en todas las configuraciones. Ahora se usa `nodelist=list(data.columns)` en todos los scripts (líneas marcadas con `# FIX orden de nodos (Alarm)`). Solo afecta a las métricas frente al grafo real, no al entrenamiento ni al BIC. **Las métricas de Alarm (y probablemente Hailfinder) del TFG deben recalcularse.**
+* **Modelo evaluado.** Los scripts del TFG sustituyen al final los parámetros por los de *menor pérdida media* (ventana de 200 iteraciones) y ese es el `model.npz` que usan las fases 2 y 3. En una GFlowNet off-policy la pérdida depende del contenido del buffer, de modo que el prefill cambia qué checkpoint se elige y las configuraciones no son comparables. En `train_gflownet_v2.py` se evalúan por defecto los parámetros finales (`--eval_params final`); `--eval_params best_loss` reproduce el TFG. Se guardan ambos (`model_final.npz`, `model_best_loss.npz`; `model.npz` es el evaluado).
+* **Red base exacta.** Sin `--informed`, la red de `train_gflownet_v2.py` es ahora exactamente la original (antes se le pasaba una matriz de delta-scores de ceros que restaba log(nº acciones válidas) al logit de parada).
+
+### Problemas identificados en el warm-start del TFG
+
+1. **Dilución.** 100 episodios HC son ~10²–10³ transiciones en un buffer FIFO de 100k que recibe 8 transiciones por iteración y que al principio se llena con exploración uniforme: tras unos cientos de iteraciones las transiciones HC son minoría y hacia la iteración ~12k se han sobrescrito. → buffer experto protegido con muestreo mixto (`--expert_buffer`, `--rho_start`, `--rho_end`).
+2. **Sesgo de parada.** Todas las transiciones HC tienen Δscore > 0 y no hay ejemplos cerca del óptimo donde añadir empeore: la red aprende que añadir aristas siempre compensa y baja P(stop) → grafos más densos. → transiciones frontera G* → G*+arista (`--boundary_M`) y trayectorias en órdenes aleatorios (`--backward_K`).
+
+Diagnósticos añadidos a `training_history.csv`: `heuristic_fraction_batch` (fracción esperada de transiciones heurísticas por minilote), `buffer_main_size`, `buffer_expert_size`, `expert_pstop_mean` y `expert_log_pstop_mean` (P(stop) media en los DAGs del prefill).
+
+### Opciones de `train_gflownet_v2.py`
 
 | Opción | Qué hace |
 | --- | --- |
+| `--eval_params final\|best_loss` | Parámetros evaluados/guardados (por defecto `final`) |
 | `--informed` | Política informada: logits de cada arista = beta·ΔBIC + salida de la red |
 | `--logit_scale_init 3.0` | Escala aprendible del logit de parada (3.0 ≈ ×20) |
 | `--update_target_every 50` | Red objetivo más frecuente (ya existía; por defecto 1000) |
-| `--fixed_epsilon 0.1` | Exploración fija del 10 % (ya existía) |
+| `--fixed_epsilon 0.1` | Exploración fija del 10 % (ya existía; por defecto la exploración empieza 100 % uniforme) |
 | `--max_parents 5` | Máximo de padres por nodo |
 | `--beta0`, `--beta_end`, `--anneal_frac` | Templado de la recompensa: log R = beta·BIC |
 | `--expert_buffer`, `--rho_start`, `--rho_end` | Buffer experto protegido y muestreo mixto |
@@ -226,39 +237,44 @@ Cambios respecto al TFG:
 
 Módulos nuevos: `dag_gflownet/gflownet_informed.py`, `dag_gflownet/nets/gflownet_informed.py`, `dag_gflownet/warmstart_v2.py`, `dag_gflownet/utils/replay_buffer_mixed.py`.
 
-### Comandos
+### Ejecución en el clúster
 
-Prueba corta (comprobar que todo funciona, 1.000 iteraciones):
-
-```bash
-micromamba run -n gflowOpt python train_gflownet_v2.py \
-  --lr 3e-5 --batch_size 256 --num_iterations 1000 --prefill 0 \
-  --informed --update_target_every 50 --logit_scale_init 3.0 \
-  --fixed_epsilon 0.1 --max_parents 5 \
-  --seed 0 --history_training 250 \
-  --output_folder output_v2_prueba_asia \
-  asia_interventional_bic
-```
-
-Configuraciones a comparar (cambiar `--seed`, `--output_folder` y el dataset):
+El código JAX de la ampliación **todavía no se ha ejecutado**: primero, la prueba rápida (5 configuraciones × 300 iteraciones en Asia):
 
 ```bash
-# Base del TFG (sin prefill), con el SHD ya corregido
-micromamba run -n gflowOpt python train_gflownet_v2.py --lr 1e-4 --batch_size 256 --prefill 0 \
-  --seed 0 --history_training 1000 --output_folder output_v2_base_s0 child_interventional_bic
-
-# F: correcciones de entrenamiento
-micromamba run -n gflowOpt python train_gflownet_v2.py --lr 1e-4 --batch_size 256 --prefill 0 \
-  --update_target_every 50 --logit_scale_init 3.0 --fixed_epsilon 0.1 --max_parents 5 \
-  --seed 0 --history_training 1000 --output_folder output_v2_F_s0 child_interventional_bic
-
-# I: política informada
-micromamba run -n gflowOpt python train_gflownet_v2.py --lr 3e-5 --batch_size 256 --prefill 0 \
-  --informed --update_target_every 50 --logit_scale_init 3.0 --fixed_epsilon 0.1 --max_parents 5 \
-  --seed 0 --history_training 1000 --output_folder output_v2_I_s0 child_interventional_bic
+RUN="python" bash scripts/smoke_test_ampliacion.sh
 ```
+
+`RUN` indica cómo lanzar Python (con el entorno ya activado basta `python`; si no, p. ej. `RUN="conda run -n gflowOpt python"`).
+
+Comparación completa (base, P, PW, F, I, IW; 4 redes × 5 semillas), en segundo plano:
+
+```bash
+nohup bash scripts/run_ampliacion.sh > logs_ampliacion/run.log 2>&1 &
+```
+
+o, si el clúster usa SLURM, ajustando partición y entorno en `scripts/slurm_ampliacion.sh`:
+
+```bash
+sbatch --array=0-119%6 scripts/slurm_ampliacion.sh
+```
+
+Resumen de resultados (media ± desviación por red y configuración):
+
+```bash
+python scripts/resumen_ampliacion.py resultados_ampliacion
+```
+
+| Config | Qué es |
+| --- | --- |
+| `base` | GFlowNet sin prefill (TFG) |
+| `P` | Prefill HC del TFG |
+| `PW` | Prefill HC + buffer experto + trayectorias hacia atrás + frontera |
+| `F` | Ajustes de entrenamiento |
+| `I` | F + política informada |
+| `IW` | I + warm-start PW |
 
 Notas:
 
-* Las fases 2 y 3 (`train_proxy_from_gflownet.py`, `HC.py`) crean su propio `DAGGFlowNet`. Con un modelo entrenado con `--informed`, hay que cargarlo con `InformedDAGGFlowNet` (todavía no está adaptado).
-* Si `wandb` pide iniciar sesión, se puede añadir `WANDB_MODE=offline` delante del comando.
+* Las fases 2 y 3 (`train_proxy_from_gflownet.py`, `HC.py`) crean su propio `DAGGFlowNet`. Un modelo entrenado con `--informed` hay que cargarlo con `InformedDAGGFlowNet` (todavía no está adaptado); los demás son compatibles.
+* `wandb` se usa en modo offline en los scripts (`WANDB_MODE=offline`).

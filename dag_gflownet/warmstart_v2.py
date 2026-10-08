@@ -9,8 +9,7 @@ Contenido:
   * add_transitions: inserta transiciones (adj, acción, delta) en un ReplayBuffer del código base
     con exactamente el mismo formato que las que genera el entorno.
 
-Validado en el prototipo NumPy (ver prototipo_numpy/). Este port a JAX NO se ha podido ejecutar
-en el entorno donde se escribió (sin acceso a PyPI): compruébalo primero con pocas iteraciones.
+Pendiente de validar en el clúster: ejecutar primero scripts/smoke_test_ampliacion.sh (pocas iteraciones).
 """
 import numpy as np
 

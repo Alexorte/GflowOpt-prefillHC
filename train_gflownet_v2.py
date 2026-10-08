@@ -11,7 +11,11 @@ Copia de train_gflownet_prefill_hc.py con:
   * --logit_scale_init: escala aprendible del logit de stop.
   * --hc_every, --hc_top, --hc_K: Hill Climbing dentro del bucle (T1).
   * --update_target_every ya existía: se recomienda 50 en lugar de 1000.
-Con todos los flags por defecto reproduce el comportamiento original (salvo la corrección de nodelist).
+  * --eval_params: 'final' (por defecto) evalúa y guarda los parámetros de la última iteración;
+    'best_loss' reproduce el TFG (parámetros de mínima pérdida media). Se guardan ambos modelos.
+  * Diagnósticos en training_history: fracción heurística por minilote y P(stop | DAGs expertos).
+Con los flags por defecto y --eval_params best_loss reproduce el comportamiento original
+(salvo la corrección de nodelist).
 """
 import jax.numpy as jnp
 import numpy as np
@@ -48,7 +52,7 @@ from dag_gflownet.utils.training_state import TrainingStateSaver, save_training_
 from dag_gflownet.hc_prefill import prefill_hc
 from dag_gflownet.gflownet_informed import InformedDAGGFlowNet
 from dag_gflownet.warmstart_v2 import (DeltaFeatures, backward_trajectories, boundary_transitions,
-                                       add_transitions, hill_climb)
+                                       add_transitions, hill_climb, env_like_mask)
 from dag_gflownet.utils.replay_buffer_mixed import MixedReplay
 from sklearn.model_selection import train_test_split
 from dag_gflownet.utils.history import summarize_prefill_history
@@ -168,13 +172,15 @@ def main(args):
         history_every=args.history_every,
         history_callback=lambda stats, ep: summarize_prefill_history(stats, ep, graph, data_test)
     )
+    # DAGs finales únicos del prefill (los "expertos"): se usan en W2 y en el diagnóstico de P(stop)
+    uniq = {}
+    for st in stats:
+        g = np.asarray(st["final_adj"]).astype(np.int_)
+        uniq[g.tobytes()] = g
+    expert_dags = list(uniq.values())
     if args.backward_K > 0 or args.boundary_M > 0:
-        uniq = {}
-        for st in stats:
-            g = np.asarray(st["final_adj"]).astype(np.int_)
-            uniq[g.tobytes()] = g
         target_buf = expert if expert is not None else replay
-        for g in uniq.values():
+        for g in expert_dags:
             trans = []
             if args.backward_K > 0:
                 trans += backward_trajectories(features, g, args.backward_K, rng)
@@ -185,6 +191,14 @@ def main(args):
               f"({len(target_buf)} transiciones)")
     mixed = MixedReplay(replay, expert) if expert is not None else None
     hc_time = time.time() - hc_start
+
+    # Diagnóstico de la dilución: transiciones heurísticas que quedan en el buffer principal (FIFO)
+    n_prefill_main = len(replay)
+    online_added = 0
+    # Diagnóstico del sesgo de parada: P(stop | G*) sobre (como mucho) 32 DAGs expertos
+    diag_dags = np.stack(expert_dags[:32]) if expert_dags else None
+    diag_masks = (np.stack([env_like_mask(g, args.max_parents) for g in diag_dags])
+                  if diag_dags is not None else None)
 
     args.output_folder.mkdir(parents=True, exist_ok=True)
 
@@ -434,6 +448,7 @@ def main(args):
                 dones,
                 prev_indices=indices
             )
+            online_added += int(np.sum(indices >= 0))
             observations = next_observations
 
             # 对于继续训练的情况，只有预填充完毕才执行模型更新
@@ -578,6 +593,19 @@ def main(args):
                         include_slow_metrics=include_slow_metrics,
                         equivalent_sample_size=1.0,
                     )
+                    # Fracción esperada de transiciones heurísticas en cada minilote
+                    if mixed is not None:
+                        heuristic_fraction = rho_at(iteration) if len(replay) > 0 else 1.0
+                    else:
+                        overwritten = max(0, n_prefill_main + online_added - args.replay_capacity)
+                        heuristic_fraction = max(0, n_prefill_main - overwritten) / max(1, len(replay))
+                    history_row['heuristic_fraction_batch'] = float(heuristic_fraction)
+                    history_row['buffer_main_size'] = int(len(replay))
+                    history_row['buffer_expert_size'] = int(len(expert)) if expert is not None else 0
+                    if diag_dags is not None:
+                        log_pstop = gflownet.log_stop_prob(params.online, diag_dags, diag_masks, normalization)
+                        history_row['expert_log_pstop_mean'] = float(np.mean(log_pstop))
+                        history_row['expert_pstop_mean'] = float(np.mean(np.exp(log_pstop)))
                     training_history.append(history_row)
                 
                 # 如果连续100轮损失没有明显下降，且使用了学习率调度器，则打印学习率信息
@@ -588,8 +616,13 @@ def main(args):
     
     training_time = time.time() - train_start
 
-    # 使用最佳参数替换最终参数
-    if best_params is not None:
+    # Parámetros que se evalúan y se guardan en model.npz (los usan también las fases 2 y 3).
+    # 'final' (por defecto en v2): los de la última iteración.
+    # 'best_loss' (comportamiento del TFG): los de menor pérdida media en ventana; en una GFlowNet
+    # off-policy la pérdida depende del contenido del buffer, así que este criterio favorece de forma
+    # distinta a cada configuración de prefill y no es comparable entre ellas.
+    final_online = params.online
+    if args.eval_params == 'best_loss' and best_params is not None:
         params = params._replace(online=best_params)
         print(f"使用最佳模型参数，最佳损失: {loss_tracker.best_loss:.4f}")
     
@@ -638,6 +671,9 @@ def main(args):
         "training_time_seconds": float(training_time),
         "evaluation_time_seconds": float(eval_time),
         "total_time_seconds": float(hc_time + training_time + eval_time),
+        "eval_params": args.eval_params,
+        "best_loss_iteration": int(loss_tracker.best_epoch),
+        "num_expert_dags": len(expert_dags),
     }
 
     # Save model, data & results
@@ -649,6 +685,9 @@ def main(args):
     with open(args.output_folder / 'graph.pkl', 'wb') as f:
         pickle.dump(graph, f)
     io.save(args.output_folder / 'model.npz', params=params.online)
+    io.save(args.output_folder / 'model_final.npz', params=final_online)
+    if best_params is not None:
+        io.save(args.output_folder / 'model_best_loss.npz', params=best_params)
     replay.save(args.output_folder / 'replay_buffer.npz')
     np.save(args.output_folder / 'posterior.npy', posterior)
     with open(args.output_folder / 'results.json', 'w') as f:
@@ -788,6 +827,9 @@ if __name__ == '__main__':
     v2.add_argument('--hc_every', type=int, default=0, help='T1: cada cuántas iteraciones aplicar HC (0 = desactivado)')
     v2.add_argument('--hc_top', type=int, default=4)
     v2.add_argument('--hc_K', type=int, default=10)
+    v2.add_argument('--eval_params', choices=['final', 'best_loss'], default='final',
+        help="Parámetros evaluados y guardados en model.npz: 'final' (última iteración) o "
+             "'best_loss' (mínima pérdida media, comportamiento del TFG)")
 
     # 对比学习参数
     contrastive = parser.add_argument_group('Contrastive Learning')

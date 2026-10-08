@@ -23,6 +23,7 @@ from dag_gflownet.gflownet_c_b import DAGGFlowNet, DAGGFlowNetParameters, DAGGFl
 from dag_gflownet.nets.gflownet_informed import gflownet_informed
 from dag_gflownet.utils.gflownet_v2 import uniform_log_policy, detailed_balance_loss
 from dag_gflownet.utils.jnp_utils import batch_random_choice
+from dag_gflownet.utils.jraph_utils import to_graphs_tuple
 
 
 class InformedDAGGFlowNet(DAGGFlowNet):
@@ -34,9 +35,19 @@ class InformedDAGGFlowNet(DAGGFlowNet):
 
     # ---------------------------------------------------------------- utilidades
     def _D(self, adjacency):
+        # Sin --informed se devuelve None para que la red sea exactamente la original: con una
+        # matriz de ceros, el término logsumexp restaría log(nº de acciones válidas) al logit de stop.
         if not self.informed:
-            return np.zeros(np.asarray(adjacency).shape, dtype=np.float32)
+            return None
         return self.features.matrix(np.asarray(adjacency))
+
+    def log_stop_prob(self, params, adjacency, masks, normalization=jnp.array(1.)):
+        """log P(stop | G) para un lote de DAGs (diagnóstico del sesgo de parada en los DAGs expertos)."""
+        adjacency = np.asarray(adjacency).astype(np.int_)
+        graphs = to_graphs_tuple(adjacency)
+        log_pi, _ = self.model.apply(params, graphs, jnp.asarray(masks, dtype=jnp.float32), normalization,
+                                     self._D(adjacency), jnp.array(self.beta, dtype=jnp.float32))
+        return np.asarray(log_pi[:, -1])
 
     # ---------------------------------------------------------------- init
     def init(self, key, optimizer, graph, mask, gflownet_params=None):
