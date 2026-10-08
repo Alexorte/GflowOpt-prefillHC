@@ -11,6 +11,8 @@ Copia de train_gflownet_prefill_hc.py con:
   * --logit_scale_init: escala aprendible del logit de stop.
   * --hc_every, --hc_top, --hc_K: Hill Climbing dentro del bucle (T1).
   * --update_target_every ya existía: se recomienda 50 en lugar de 1000.
+  * --ls_every, --ls_batch, --ls_rounds, --ls_destroy: búsqueda local guiada por la política
+    (Local Search GFlowNets); con --expert_buffer sus trayectorias van al buffer protegido.
   * --eval_params: 'final' (por defecto) evalúa y guarda los parámetros de la última iteración;
     'best_loss' reproduce el TFG (parámetros de mínima pérdida media). Se guardan ambos modelos.
   * Diagnósticos en training_history: fracción heurística por minilote y P(stop | DAGs expertos).
@@ -54,6 +56,7 @@ from dag_gflownet.gflownet_informed import InformedDAGGFlowNet
 from dag_gflownet.warmstart_v2 import (DeltaFeatures, backward_trajectories, boundary_transitions,
                                        add_transitions, hill_climb, env_like_mask)
 from dag_gflownet.utils.replay_buffer_mixed import MixedReplay
+from dag_gflownet.local_search import local_search
 from sklearn.model_selection import train_test_split
 from dag_gflownet.utils.history import summarize_prefill_history
 from dag_gflownet.utils.posterior_predictive import posterior_neg_avg_posterior_predictive_loglik
@@ -370,7 +373,8 @@ def main(args):
             samples = mixed.sample(config.batch_size, rng, 1.0)
             params, state, _ = gflownet.step(params, state, samples, normalization)
 
-    recent_terminal = []  # T1
+    recent_terminal = []  # T1 / LS: DAGs terminales recientes muestreados por la política
+    ls_stats = {}
 
     # Training loop
     # 如果继续训练，调整起始迭代次数
@@ -434,7 +438,7 @@ def main(args):
             #print("score:", observations['num_edges'])
             #print("score:", observations['score'])
             acts_np = np.asarray(actions).reshape(-1)
-            if args.hc_every > 0:
+            if args.hc_every > 0 or args.ls_every > 0:
                 for b in np.nonzero(acts_np == d * d)[0]:
                     g_term = np.asarray(observations['adjacency'][b]).astype(np.int_)
                     recent_terminal.append((features.score(g_term), g_term))
@@ -461,6 +465,19 @@ def main(args):
                 # Update the parameters of the GFlowNet
                 samples = sample_batch(iteration)
                 params, state, logs = gflownet.step(params, state, samples, normalization)
+
+                # LS: búsqueda local guiada por la política sobre los mejores DAGs recientes
+                if args.ls_every > 0 and iteration % args.ls_every == 0 and recent_terminal:
+                    recent_terminal.sort(key=lambda x: -x[0])
+                    cand = [g for _, g in recent_terminal[:args.ls_batch]]
+                    cand = [cand[i % len(cand)] for i in range(args.ls_batch)]  # lote fijo (evita recompilar)
+                    key, ls_trans, _, ls_stats = local_search(
+                        gflownet, params.online, key, np.stack(cand), features, rng,
+                        rounds=args.ls_rounds, destroy_frac=args.ls_destroy,
+                        max_parents=args.max_parents, normalization=normalization)
+                    add_transitions(expert if expert is not None else replay, ls_trans, args.max_parents)
+                    if args.hc_every == 0:
+                        recent_terminal = []
 
                 # T1: Hill Climbing sobre los mejores DAGs recientes -> trayectorias al buffer experto
                 if args.hc_every > 0 and iteration % args.hc_every == 0 and recent_terminal:
@@ -602,6 +619,7 @@ def main(args):
                     history_row['heuristic_fraction_batch'] = float(heuristic_fraction)
                     history_row['buffer_main_size'] = int(len(replay))
                     history_row['buffer_expert_size'] = int(len(expert)) if expert is not None else 0
+                    history_row.update({k: float(v) for k, v in ls_stats.items()})
                     if diag_dags is not None:
                         log_pstop = gflownet.log_stop_prob(params.online, diag_dags, diag_masks, normalization)
                         history_row['expert_log_pstop_mean'] = float(np.mean(log_pstop))
@@ -827,6 +845,11 @@ if __name__ == '__main__':
     v2.add_argument('--hc_every', type=int, default=0, help='T1: cada cuántas iteraciones aplicar HC (0 = desactivado)')
     v2.add_argument('--hc_top', type=int, default=4)
     v2.add_argument('--hc_K', type=int, default=10)
+    v2.add_argument('--ls_every', type=int, default=0,
+        help='LS: cada cuántas iteraciones aplicar búsqueda local guiada por la política (0 = desactivado)')
+    v2.add_argument('--ls_batch', type=int, default=16, help='LS: nº de DAGs recientes que se refinan')
+    v2.add_argument('--ls_rounds', type=int, default=4, help='LS: rondas destruir-reconstruir-aceptar')
+    v2.add_argument('--ls_destroy', type=float, default=0.5, help='LS: fracción de aristas que se quitan')
     v2.add_argument('--eval_params', choices=['final', 'best_loss'], default='final',
         help="Parámetros evaluados y guardados en model.npz: 'final' (última iteración) o "
              "'best_loss' (mínima pérdida media, comportamiento del TFG)")

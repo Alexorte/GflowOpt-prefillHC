@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Comparación de la ampliación (train_gflownet_v2.py). Configuraciones:
-#   base : GFlowNet sin prefill (TFG)
-#   P    : prefill HC del TFG (100 episodios en el buffer FIFO, se diluye)
-#   PW   : prefill HC + buffer experto protegido + trayectorias hacia atrás + transiciones frontera
-#   F    : ajustes de entrenamiento (red objetivo frecuente, escala de stop, eps fijo, max padres)
+# Comparación de la ampliación (train_gflownet_v2.py, solo fase GFlowNet). Escalera de ablación:
+#   base : GFlowNet tal cual viene (TFG sin prefill), evaluando los parámetros finales
+#   M    : base + máximo 5 padres (referencia justa: mismo espacio de búsqueda que el resto)
+#   F    : M + ajustes de entrenamiento (eps fijo 0.1, red objetivo cada 50, escala del stop)
+#   LS   : F + búsqueda local guiada por la política -> buffer protegido con muestreo mixto
+#   LST  : LS + templado de la recompensa (beta 0.1 -> 1 en la primera mitad)
 #   I    : F + política informada por el delta-score
-#   IW   : I + warm-start PW
+# Opcionales (no se lanzan por defecto; añadir a CONFIGS): P, PW (warm-start del TFG), ILS (I + LS).
 # Uso (desde la raíz del repo):  nohup bash scripts/run_ampliacion.sh > logs_ampliacion/run.log 2>&1 &
 # Variables opcionales: DATASETS, SEEDS, CONFIGS, ITERS, PARALLEL, RUN, OUT
 #   RUN: cómo se lanza Python. Por defecto "python" (entorno ya activado);
@@ -13,7 +14,7 @@
 set -u
 DATASETS=${DATASETS:-"asia_interventional_bic sachs_interventional_bic child_interventional_bic alarm_interventional_bic"}
 SEEDS=${SEEDS:-"0 1 2 3 4"}
-CONFIGS=${CONFIGS:-"base P PW F I IW"}
+CONFIGS=${CONFIGS:-"base M F LS LST I"}
 ITERS=${ITERS:-30000}
 PARALLEL=${PARALLEL:-3}
 RUN=${RUN:-python}
@@ -31,13 +32,20 @@ FIX="--update_target_every 50 --logit_scale_init 3.0 --fixed_epsilon 0.1 --max_p
 PREFILL="--prefill 100 --hc_epsilon 0.2 --hc_top_k 5"
 WARM="$PREFILL --expert_buffer --rho_start 0.5 --rho_end 0.1 --backward_K 10 --boundary_M 20"
 
+MP="--max_parents 5"
+LS="--expert_buffer --rho_start 0.5 --rho_end 0.2 --ls_every 20 --ls_batch 16 --ls_rounds 4 --ls_destroy 0.5"
+TEMP="--beta0 0.1 --beta_end 1.0 --anneal_frac 0.5"
+
 declare -A CFG
 CFG[base]="--lr 1e-4 --prefill 0"
+CFG[M]="--lr 1e-4 --prefill 0 $MP"
+CFG[F]="--lr 1e-4 --prefill 0 $FIX"
+CFG[LS]="--lr 1e-4 --prefill 0 $FIX $LS"
+CFG[LST]="--lr 1e-4 --prefill 0 $FIX $LS $TEMP"
+CFG[I]="--lr 3e-5 --prefill 0 $FIX --informed"
+CFG[ILS]="--lr 3e-5 --prefill 0 $FIX --informed $LS"
 CFG[P]="--lr 1e-4 $PREFILL"
 CFG[PW]="--lr 1e-4 $WARM"
-CFG[F]="--lr 1e-4 --prefill 0 $FIX"
-CFG[I]="--lr 3e-5 --prefill 0 $FIX --informed"
-CFG[IW]="--lr 3e-5 $FIX --informed $WARM"
 
 run_one () {
   local ds=$1 cfg=$2 seed=$3

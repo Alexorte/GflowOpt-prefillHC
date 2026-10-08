@@ -234,12 +234,17 @@ Diagnósticos añadidos a `training_history.csv`: `heuristic_fraction_batch` (fr
 | `--backward_K`, `--boundary_M` | Trayectorias hacia atrás y transiciones frontera desde los DAGs del prefill |
 | `--pretrain_steps` | Preentrenamiento sobre el buffer experto |
 | `--hc_every`, `--hc_top`, `--hc_K` | Hill Climbing dentro del bucle de entrenamiento |
+| `--ls_every`, `--ls_batch`, `--ls_rounds`, `--ls_destroy` | Búsqueda local guiada por la política (ver abajo) |
 
-Módulos nuevos: `dag_gflownet/gflownet_informed.py`, `dag_gflownet/nets/gflownet_informed.py`, `dag_gflownet/warmstart_v2.py`, `dag_gflownet/utils/replay_buffer_mixed.py`.
+### Búsqueda local guiada por la política (`--ls_every`)
+
+Inspirada en *Local Search GFlowNets* (Kim et al., ICLR 2024). Cada `ls_every` iteraciones se toman los `ls_batch` mejores DAGs muestreados recientemente por la política y se aplican `ls_rounds` rondas de: quitar al azar una fracción `ls_destroy` de las aristas, reconstruir el DAG con la política actual y aceptar si el BIC mejora. Las trayectorias aceptadas se insertan en el buffer (con `--expert_buffer`, en el protegido, del que sale una fracción `rho` de cada minilote). A diferencia del prefill HC, los datos de alta recompensa se generan durante todo el entrenamiento y con la propia política, así que no se diluyen. La pérdida DB es off-policy, por lo que siguen siendo datos válidos. Diagnósticos en `training_history.csv`: `ls_accept_rate`, `ls_mean_gain`, `ls_best_score`, `ls_num_transitions`. Código: `dag_gflownet/local_search.py`.
+
+Módulos nuevos: `dag_gflownet/local_search.py`, `dag_gflownet/gflownet_informed.py`, `dag_gflownet/nets/gflownet_informed.py`, `dag_gflownet/warmstart_v2.py`, `dag_gflownet/utils/replay_buffer_mixed.py`.
 
 ### Ejecución en el clúster
 
-El código JAX de la ampliación **todavía no se ha ejecutado**: primero, la prueba rápida (5 configuraciones × 300 iteraciones en Asia):
+El código JAX de la ampliación **todavía no se ha ejecutado**: primero, la prueba rápida (6 configuraciones × 300 iteraciones en Asia, cubre todas las opciones nuevas):
 
 ```bash
 RUN="python" bash scripts/smoke_test_ampliacion.sh
@@ -247,7 +252,7 @@ RUN="python" bash scripts/smoke_test_ampliacion.sh
 
 `RUN` indica cómo lanzar Python (con el entorno ya activado basta `python`; si no, p. ej. `RUN="conda run -n gflowOpt python"`).
 
-Comparación completa (base, P, PW, F, I, IW; 4 redes × 5 semillas), en segundo plano:
+Comparación completa (base, M, F, LS, LST, I; 4 redes × 5 semillas), en segundo plano:
 
 ```bash
 nohup bash scripts/run_ampliacion.sh > logs_ampliacion/run.log 2>&1 &
@@ -265,14 +270,18 @@ Resumen de resultados (media ± desviación por red y configuración):
 python scripts/resumen_ampliacion.py resultados_ampliacion
 ```
 
+Escalera de ablación (cada paso añade una sola cosa, para poder atribuir cada mejora):
+
 | Config | Qué es |
 | --- | --- |
-| `base` | GFlowNet sin prefill (TFG) |
-| `P` | Prefill HC del TFG |
-| `PW` | Prefill HC + buffer experto + trayectorias hacia atrás + frontera |
-| `F` | Ajustes de entrenamiento |
-| `I` | F + política informada |
-| `IW` | I + warm-start PW |
+| `base` | GFlowNet tal cual viene (TFG sin prefill), evaluando los parámetros finales |
+| `M` | base + máximo 5 padres (referencia justa: mismo espacio de búsqueda que las demás) |
+| `F` | M + ajustes de entrenamiento (ε fijo 0,1, red objetivo cada 50, escala del stop) |
+| `LS` | F + búsqueda local guiada por la política → buffer protegido |
+| `LST` | LS + templado de la recompensa (β 0,1 → 1 en la primera mitad) |
+| `I` | F + política informada por el delta-score |
+
+Opcionales (añadir a `CONFIGS`): `ILS` (I + LS), `P` y `PW` (warm-start del TFG). LS e I hacen más cálculo por iteración: hay que comparar también por tiempo (`training_time_seconds` en `training_history.csv`), no solo por iteraciones.
 
 Notas:
 

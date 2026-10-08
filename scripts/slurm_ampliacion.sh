@@ -16,7 +16,7 @@ set -u
 # source ~/miniconda3/etc/profile.d/conda.sh && conda activate gflowOpt
 
 DATASETS=(asia_interventional_bic sachs_interventional_bic child_interventional_bic alarm_interventional_bic)
-CONFIGS=(base P PW F I IW)
+CONFIGS=(base M F LS LST I)
 SEEDS=(0 1 2 3 4)
 ITERS=${ITERS:-30000}
 OUT=${OUT:-resultados_ampliacion}

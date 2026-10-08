@@ -4,7 +4,7 @@ import json, sys, glob, os
 import numpy as np
 
 base = sys.argv[1] if len(sys.argv) > 1 else 'resultados_ampliacion'
-ORDER = ['base', 'P', 'PW', 'F', 'I', 'IW']
+ORDER = ['base', 'M', 'F', 'LS', 'LST', 'I', 'ILS', 'P', 'PW']
 rows = {}
 for f in sorted(glob.glob(os.path.join(base, '*', 'results.json'))):
     name = os.path.basename(os.path.dirname(f))          # p.ej. child_I_s0
