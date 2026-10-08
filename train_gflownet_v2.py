@@ -13,6 +13,7 @@ Copia de train_gflownet_prefill_hc.py con:
   * --update_target_every ya existía: se recomienda 50 en lugar de 1000.
   * --ls_every, --ls_batch, --ls_rounds, --ls_destroy: búsqueda local guiada por la política
     (Local Search GFlowNets); con --expert_buffer sus trayectorias van al buffer protegido.
+  * --data_seed: semilla de la división train/test, fija entre semillas (el TFG usaba --seed).
   * --eval_params: 'final' (por defecto) evalúa y guarda los parámetros de la última iteración;
     'best_loss' reproduce el TFG (parámetros de mínima pérdida media). Se guardan ambos modelos.
   * Diagnósticos en training_history: fracción heurística por minilote y P(stop | DAGs expertos).
@@ -104,7 +105,7 @@ def main(args):
     data_train, data_test = train_test_split(
         data,
         test_size=0.2,
-        random_state=args.seed,
+        random_state=args.data_seed,  # fija entre semillas: solo cambia el algoritmo
         shuffle=True
     )
 
@@ -850,6 +851,9 @@ if __name__ == '__main__':
     v2.add_argument('--ls_batch', type=int, default=16, help='LS: nº de DAGs recientes que se refinan')
     v2.add_argument('--ls_rounds', type=int, default=4, help='LS: rondas destruir-reconstruir-aceptar')
     v2.add_argument('--ls_destroy', type=float, default=0.5, help='LS: fracción de aristas que se quitan')
+    v2.add_argument('--data_seed', type=int, default=0,
+        help='Semilla de la división train/test, independiente de --seed (el TFG usaba --seed). '
+             'Los datos simulados ya son fijos en data.py.')
     v2.add_argument('--eval_params', choices=['final', 'best_loss'], default='final',
         help="Parámetros evaluados y guardados en model.npz: 'final' (última iteración) o "
              "'best_loss' (mínima pérdida media, comportamiento del TFG)")

@@ -210,6 +210,7 @@ Este repositorio tiene como objetivo reproducir los experimentos realizados en e
 
 * **Orden de nodos del ground truth.** En Alarm (y en cualquier red cuyo orden de pgmpy no coincida con el `fixed_order` de los datos) el SHD/AUROC se calculaba contra una red permutada: por eso el AUROC de Alarm salía ≈ 0,50 en todas las configuraciones. Ahora se usa `nodelist=list(data.columns)` en todos los scripts (líneas marcadas con `# FIX orden de nodos (Alarm)`). Solo afecta a las métricas frente al grafo real, no al entrenamiento ni al BIC. **Las métricas de Alarm (y probablemente Hailfinder) del TFG deben recalcularse.**
 * **Modelo evaluado.** Los scripts del TFG sustituyen al final los parámetros por los de *menor pérdida media* (ventana de 200 iteraciones) y ese es el `model.npz` que usan las fases 2 y 3. En una GFlowNet off-policy la pérdida depende del contenido del buffer, de modo que el prefill cambia qué checkpoint se elige y las configuraciones no son comparables. En `train_gflownet_v2.py` se evalúan por defecto los parámetros finales (`--eval_params final`); `--eval_params best_loss` reproduce el TFG. Se guardan ambos (`model_final.npz`, `model_best_loss.npz`; `model.npz` es el evaluado).
+* **Mismos datos en todas las semillas.** Los datos simulados ya eran fijos (`simulate(..., seed=2|9)` en `data.py`), pero la división train/test usaba `random_state=args.seed`, así que cada semilla entrenaba con datos distintos. En `train_gflownet_v2.py` la división usa `--data_seed` (por defecto 0): entre semillas solo cambia el algoritmo y la varianza entre ejecuciones se debe solo a él.
 * **Red base exacta.** Sin `--informed`, la red de `train_gflownet_v2.py` es ahora exactamente la original (antes se le pasaba una matriz de delta-scores de ceros que restaba log(nº acciones válidas) al logit de parada).
 
 ### Problemas identificados en el warm-start del TFG
@@ -223,6 +224,7 @@ Diagnósticos añadidos a `training_history.csv`: `heuristic_fraction_batch` (fr
 
 | Opción | Qué hace |
 | --- | --- |
+| `--data_seed 0` | Semilla de la división train/test, fija entre semillas |
 | `--eval_params final\|best_loss` | Parámetros evaluados/guardados (por defecto `final`) |
 | `--informed` | Política informada: logits de cada arista = beta·ΔBIC + salida de la red |
 | `--logit_scale_init 3.0` | Escala aprendible del logit de parada (3.0 ≈ ×20) |
